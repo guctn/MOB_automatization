@@ -1,6 +1,6 @@
 import logo from "./icon_header.png";
-import React, { useState } from 'react';
-import './App.css';
+import React, { useState } from "react";
+import "./App.css";
 
 function App() {
   const [csvFile, setCsvFile] = useState(null);
@@ -9,11 +9,11 @@ function App() {
   const [ticket, setTicket] = useState("");
   const [status, setStatus] = useState("");
 
-  const EXCEL_TEMPLATE_URL = ProcessingInstruction.env.PUBLIC_URL + '/template.xlsx';
+  const EXCEL_TEMPLATE_URL = process.env.PUBLIC_URL + "/template.xlsx";
 
   const handleCsvFileChange = (event) => {
     setCsvFile(event.target.files[0]);
-  }
+  };
 
   const handleLocalesChange = (event) => {
     setLocales(event.target.value);
@@ -41,17 +41,30 @@ function App() {
   };
 
   const parseSingleColumnCsv = (csvText) => {
-    const lines = csvText.trim().split('\n');
-    return lines.filter(line => line.trim() !== '').map(line => line.trim());
-  }
+    const lines = csvText.trim().split("\n");
+    return lines.filter((line) => line.trim() !== "").map((line) => line.trim());
+  };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!csvFile) {
+      alert("Please upload a csv file!");
+      return;
+    }
+    const text = await readFileAsText(csvFile);
+    const rows = parseSingleColumnCsv(text);
 
+    console.log("Parsed CSV rows:", rows);
+    console.log({ locales, addedBy, ticket, status });
+
+    alert("Successfully submitted!");
+  };
 
   return (
     <div className="App">
       <header className="App-header">
         <p className="p_header">Hello Amazonian!</p>
-        <img className="logo_header" src={logo} />
+        <img className="logo_header" src={logo} alt="logo" />
       </header>
       <div className="App-subtitle">
         <p>
@@ -70,6 +83,11 @@ function App() {
       <hr />
       <form onSubmit={handleSubmit} className="form-section">
         <div>
+          <label htmlFor="fileInput">Upload CSV:</label>
+          <input type="file" id="fileInput" accept=".csv" onChange={handleCsvFileChange} required/>
+        </div>
+
+        <div>
           <label htmlFor="localesSelect">Choose a locale:</label>
           <select
             id="localesSelect"
@@ -84,6 +102,7 @@ function App() {
             <option value="pt_BR">pt_BR</option>
           </select>
         </div>
+
         <div>
           <label htmlFor="addedByInput">Who are you?!</label>
           <input
@@ -96,6 +115,7 @@ function App() {
             required
           />
         </div>
+
         <div>
           <label htmlFor="ticketLinkInput">Ticket please!</label>
           <input
@@ -108,6 +128,7 @@ function App() {
             required
           />
         </div>
+
         <div>
           <label htmlFor="statusSelect">What's the status:</label>
           <select
@@ -122,8 +143,11 @@ function App() {
             <option value="Reviewed">Reviewed</option>
           </select>
         </div>
-        <button type="submit" className="submit-button">Sumbit answers</button>
+
+        <button type="submit" className="submit-button">Submit answers</button>
       </form>
+      <hr />
+
     </div>
   );
 }
